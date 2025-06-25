@@ -13,6 +13,7 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            user_data = UserSerializer(user).data
             refresh = RefreshToken.for_user(user) # JWT token yaratish
             return Response({
                 "message": "Foydalanuvchi muvaffaqiyatli yaratildi",
@@ -27,7 +28,6 @@ class LoginView(APIView):
     # permission_classes = [AllowAny]  
 
     def post(self, request):
-        print(request.data, 1)
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data["user"]
