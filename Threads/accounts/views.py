@@ -17,7 +17,7 @@ class RegisterView(APIView):
             refresh = RefreshToken.for_user(user) # JWT token yaratish
             return Response({
                 "message": "Foydalanuvchi muvaffaqiyatli yaratildi",
-                "user": user,
+                "user": user_data,
                 "refresh": str(refresh),
                 "access": str(refresh.access_token)
             }, status=status.HTTP_201_CREATED)
