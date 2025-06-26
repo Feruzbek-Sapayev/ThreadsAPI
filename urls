@@ -1,0 +1,10 @@
+/register (post) - Registratsiya
+/login (post) - Kirish
+/logout (post) - Chiqish
+/<username> (get) - Profile
+/posts/add (post) - Post qo'shish
+/posts/<uid> (get) - 1 ta postni ko'rish
+/posts/<uid>/like (post) - po'stga like bosish / olib tashlash
+/posts/<uid>/like (get) - po'stga like bosganlarni ko'rish
+/posts/<uid>/view (get) - po'stni korganlar 
+/posts/<uid>/view (post) - po'stni korish
