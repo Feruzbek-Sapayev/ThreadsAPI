@@ -1,9 +1,10 @@
-from django.urls import path
-from .views import PostListCreateView, PostDetailView, MediaUploadView, UserPostsListView
+from django.urls import path, re_path
+from .views import PostListView, PostDetailView, UserPostsListView, PostCreateView
+
 
 urlpatterns = [
-    path('posts', PostListCreateView.as_view(), name='post-list-create'),
-    path('posts/<int:pk>', PostDetailView.as_view(), name='post-detail'),
-    path('media/upload', MediaUploadView.as_view(), name='media-upload'),
-    path('<str:username>', UserPostsListView.as_view(), name='user-posts'),
+    re_path(r'^add/?$', PostCreateView.as_view(), name='post-create'),
+    re_path(r'^(?P<uid>[a-zA-Z0-9]+)/?$', PostDetailView.as_view(), name='post-detail')
+    # path('', PostListView.as_view(), name='post-list'),
+    # path('<str:username>/', UserPostsListView.as_view(), name='user-posts'),
 ]

@@ -1,10 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, LogoutSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, LogoutSerializer, ProfileSerializer
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from rest_framework_simplejwt.tokens import RefreshToken
+from .models import User
 
 class RegisterView(APIView):
     parser_classes = [JSONParser, MultiPartParser, FormParser]  # Rasmlar uchun
@@ -52,3 +53,14 @@ class LogoutView(APIView):
             serializer.save()
             return Response({"message": "Tizimdan muvaffaqiyatli chiqildi!", }, status=status.HTTP_205_RESET_CONTENT)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class ProfileView(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = ProfileSerializer
+    lookup_field = 'username'  
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request  # so‘rovni serializerga yuborish
+        return context

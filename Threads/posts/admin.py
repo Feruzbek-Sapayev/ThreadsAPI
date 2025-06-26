@@ -1,8 +1,8 @@
 from django.contrib import admin
-from .models import Post, Media
+from .models import Post, PostMedia
 
 class MediaInline(admin.TabularInline):
-    model = Media
+    model = PostMedia
     extra = 1
 
 @admin.register(Post)

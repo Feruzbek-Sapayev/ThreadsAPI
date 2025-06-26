@@ -78,3 +78,21 @@ class LogoutSerializer(serializers.Serializer):
             token.blacklist()
         except TokenError:
             raise serializers.ValidationError(_("Token allaqachon yaroqsiz yoki noto‘g‘ri"))
+        
+
+class ProfileSerializer(serializers.ModelSerializer):
+    is_owner = serializers.SerializerMethodField()
+    posts = serializers.SerializerMethodField()
+
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'phone', 'fullname', 'bio', 'photo', 'is_owner', 'posts')
+
+    def get_is_owner(self, obj):
+        request = self.context.get('request')
+        return request.user == obj
+    
+    def get_posts(self, obj):
+        from posts.serializers import PostSerializer
+        return PostSerializer(obj.posts.all(), many=True).data
