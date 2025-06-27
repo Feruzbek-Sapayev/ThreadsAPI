@@ -1,10 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, LogoutSerializer, ProfileSerializer
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import api_view, parser_classes
 from .models import User
 
 class RegisterView(APIView):
@@ -55,12 +56,51 @@ class LogoutView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-class ProfileView(generics.RetrieveAPIView):
-    queryset = User.objects.all()
+class ProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
     lookup_field = 'username'  
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['request'] = self.request  # so‘rovni serializerga yuborish
         return context
+    
+    def get_object(self): 
+        return self.request.user
+    
+
+@api_view(['GET'])
+@parser_classes([MultiPartParser, FormParser])
+def check_username(request):
+    username = request.data.get('username')
+    if not username:
+        return Response({"error": "Username is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if User.objects.filter(username=username).exists():
+        return Response({"available": False, "message": "Username already taken."})
+    return Response({"available": True})
+
+
+@api_view(['GET'])
+@parser_classes([MultiPartParser, FormParser])
+def check_email(request):
+    email = request.data.get('email')
+    if not email:
+        return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if User.objects.filter(email=email).exists():
+        return Response({"available": False, "message": "Email already taken."})
+    return Response({"available": True})
+
+
+@api_view(['GET'])
+@parser_classes([MultiPartParser, FormParser])
+def check_phone(request):
+    phone = request.data.get('phone')
+    if not phone:
+        return Response({"error": "Phone number is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if User.objects.filter(phone=phone).exists():
+        return Response({"available": False, "message": "Phone number already taken."})
+    return Response({"available": True})

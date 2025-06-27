@@ -42,10 +42,12 @@ class PostSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField(read_only=True)
+    post = serializers.UUIDField(source='post.uid', read_only=True)
 
     class Meta:
         model = Comment
-        fields = ['id', 'post', 'author', 'content', 'created_at']
+        fields = ['post', 'author', 'content', 'created_at']
+        
 
 
 class LikeSerializer(serializers.ModelSerializer):
@@ -55,7 +57,7 @@ class LikeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Like
-        fields = ['id', 'post', 'user', 'created_at']
+        fields = ['post', 'user', 'created_at']
         read_only_fields = ['user', 'created_at']
 
     def get_user(self, obj):

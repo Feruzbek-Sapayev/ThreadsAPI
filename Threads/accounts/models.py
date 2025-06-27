@@ -22,6 +22,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     fullname = models.CharField(max_length=150)
     bio = models.CharField(max_length=150, null=True, blank=True)
     photo = models.ImageField(verbose_name="profile_picture", upload_to=random_file_path, null=True, blank=True)
+    link = models.URLField(null=True, blank=True)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
