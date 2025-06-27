@@ -4,9 +4,17 @@ from accounts.serializers import UserSerializer
 
 
 class PostMediaSerializer(serializers.ModelSerializer):
+    media = serializers.SerializerMethodField()
+
     class Meta:
         model = PostMedia
         fields = ['media', 'uploaded_at']
+
+    def get_media(self, obj):
+        request = self.context.get('request')  # <-- bu kontekst orqali absolute URL hosil bo'ladi
+        if request:
+            return request.build_absolute_uri(obj.media.url)
+        return obj.media.url
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -17,10 +25,11 @@ class PostSerializer(serializers.ModelSerializer):
     comments_count = serializers.IntegerField(source='comments.count', read_only=True)
     likes_count = serializers.IntegerField(source='likes.count', read_only=True)
     views_count = serializers.IntegerField(source='views.count', read_only=True)
+    tags = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ['uid', 'author', 'content', 'created_at', 'media', 'images', 'videos', 'comments_count', 'likes_count', 'views_count']
+        fields = ['uid', 'author', 'content', 'created_at', 'media', 'images', 'videos', 'comments_count', 'likes_count', 'views_count', 'tags']
 
     def create(self, validated_data):
         media_files = validated_data.pop('media', [])
@@ -38,6 +47,9 @@ class PostSerializer(serializers.ModelSerializer):
     def get_images(self, obj):
         images = [media for media in obj.post_media.all() if media.is_image()]
         return PostMediaSerializer(images, many=True, context=self.context).data
+    
+    def get_tags(self, obj):
+        return [tag.name for tag in obj.tags.all()]
 
 
 class CommentSerializer(serializers.ModelSerializer):

@@ -6,6 +6,7 @@ from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, Lo
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, parser_classes
+from django.shortcuts import get_object_or_404
 from .models import User
 
 class RegisterView(APIView):
@@ -57,17 +58,25 @@ class LogoutView(APIView):
     
 
 class ProfileView(generics.RetrieveUpdateAPIView):
+    queryset = User.objects.all()
     serializer_class = ProfileSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    lookup_field = 'username'  
+    permission_classes = [AllowAny]  # login bo‘lmaganlar ham ko‘ra oladi
+    lookup_field = 'username'
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context['request'] = self.request  # so‘rovni serializerga yuborish
+        context['request'] = self.request  # serializerda .get_is_owner ishlashi uchun
         return context
-    
-    def get_object(self): 
-        return self.request.user
+
+    def get_object(self):
+        return get_object_or_404(self.get_queryset(), username=self.kwargs['username'])
+
+    def update(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not request.user.is_authenticated or request.user != obj:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Siz faqat o'z profilingizni o'zgartira olasiz.")
+        return super().update(request, *args, **kwargs)
     
 
 @api_view(['GET'])
