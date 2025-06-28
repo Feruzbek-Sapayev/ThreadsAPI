@@ -15,7 +15,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    photo = serializers.ImageField(required=False)
 
     class Meta:
         model = User

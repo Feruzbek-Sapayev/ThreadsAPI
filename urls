@@ -1,10 +1,26 @@
+Avtorizatsiya:
 /register (post) - Registratsiya
 /login (post) - Kirish
 /logout (post) - Chiqish
+
+Profile:
 /<username> (get) - Profile
+/<username> (patch)- Profilni yangilash
+/accounts/check/username - Username band emasligini tekshirish
+/accounts/check/email - Email band emasligini tekshirish
+/accounts/check/phone - Telefon rakamni band emasligini tekshirish
+
+Posts:
 /posts/add (post) - Post qo'shish
 /posts/<uid> (get) - 1 ta postni ko'rish
 /posts/<uid>/like (post) - po'stga like bosish / olib tashlash
 /posts/<uid>/like (get) - po'stga like bosganlarni ko'rish
 /posts/<uid>/view (get) - po'stni korganlar 
 /posts/<uid>/view (post) - po'stni korish
+/posts/<uid>/comments (post) - comment yozish
+/posts/<uid>/comments (get) - commentlarni hammasini olish
+
+
+
+Ishlanishi kerak:
+/posts (get) - Home page uchun postlarni olish
