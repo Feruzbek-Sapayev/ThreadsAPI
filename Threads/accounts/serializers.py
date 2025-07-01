@@ -93,7 +93,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_posts(self, obj):
         from posts.serializers import PostSerializer
-        return PostSerializer(obj.posts.all(), many=True).data
+        return PostSerializer(obj.posts.all().order_by('-created_at'), many=True).data
 
     def to_representation(self, instance):
         # Get the default representation
