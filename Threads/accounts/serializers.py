@@ -86,6 +86,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email', 'phone', 'fullname', 'bio', 'photo', 'link', 'is_owner', 'posts')
+        read_only_fields = ('is_owner', 'posts')
 
     def get_is_owner(self, obj):
         request = self.context.get('request')
@@ -105,6 +106,5 @@ class ProfileSerializer(serializers.ModelSerializer):
             representation.pop('email', None)
             representation.pop('phone', None)
             
-        return representation 
-    
+        return representation
         

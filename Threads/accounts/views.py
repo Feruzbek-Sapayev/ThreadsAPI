@@ -79,7 +79,7 @@ class ProfileView(generics.RetrieveUpdateAPIView):
         return super().update(request, *args, **kwargs)
     
 
-@api_view(['GET'])
+@api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])
 def check_username(request):
     username = request.data.get('username')
@@ -91,7 +91,7 @@ def check_username(request):
     return Response({"available": True})
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])
 def check_email(request):
     email = request.data.get('email')
@@ -103,7 +103,7 @@ def check_email(request):
     return Response({"available": True})
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])
 def check_phone(request):
     phone = request.data.get('phone')
