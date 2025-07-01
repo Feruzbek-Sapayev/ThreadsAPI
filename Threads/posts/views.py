@@ -130,25 +130,6 @@ class CommentListCreateView(generics.ListCreateAPIView):
         serializer.save(author=self.request.user, post=post)
 
 
-class PostShareView(generics.ListCreateAPIView):
-    serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        post_uid = self.kwargs.get('uid')
-        return Comment.objects.filter(post__uid=post_uid)
-
-    def perform_create(self, serializer):
-        post_uid = self.kwargs.get('uid')
-        post = Post.objects.get(uid=post_uid)
-        UserInteraction.objects.create(
-            user=self.request.user,
-            post=post,
-            action='comment'
-        )
-        serializer.save(author=self.request.user, post=post)
-
-
 class RecommendedPostsView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 

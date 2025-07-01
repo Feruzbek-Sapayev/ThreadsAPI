@@ -30,9 +30,6 @@ class Post(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
 
-    class Meta:
-        ordering = ['-created_at']
-
     def __str__(self):
         return f"Post {self.uid}"
 
@@ -95,25 +92,12 @@ class View(models.Model):
 
     def __str__(self):
         return f"{self.user or self.session_id} viewed {self.post.uid}"
-
-
-class Share(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='shares')
-    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='shares_from')
-    to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='shares_to')
-    shared_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('post', 'from_user', 'to_user', 'shared_at')
-
-    def __str__(self):
-        return f"{self.from_user} shared {self.post.uid} to {self.to_user}"
     
 
 class UserInteraction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    action = models.CharField(max_length=20, choices=[('like', 'Like'), ('comment', 'Comment'), ('share', 'Share')])
+    action = models.CharField(max_length=20, choices=[('like', 'Like'), ('comment', 'Comment'), ('view', 'View')])
     created_at = models.DateTimeField(auto_now_add=True)
 
 
