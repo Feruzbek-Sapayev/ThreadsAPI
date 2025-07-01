@@ -18,11 +18,21 @@ class PostCreateView(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request  # bu yerda request uzatilyapti
+        return context
+
 
 class PostDetailView(generics.RetrieveAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     lookup_field = 'uid'
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request  # bu yerda request uzatilyapti
+        return context
 
 
 class UserPostsListView(generics.ListAPIView):
@@ -31,6 +41,11 @@ class UserPostsListView(generics.ListAPIView):
     def get_queryset(self):
         username = self.kwargs.get('username')  # yoki user_id bo'lishi mumkin
         return Post.objects.filter(author__username=username).order_by('-created_at')
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request  # bu yerda request uzatilyapti
+        return context
 
 
 class LikeToggleView(generics.ListCreateAPIView):
@@ -92,16 +107,11 @@ class ViewListCreateAPIView(generics.ListCreateAPIView):
                 user=user,
                 session_id=session_id
             )
-            UserInteraction.objects.create(
-                user=user,
-                post=post,
-                action='comment'
-            )
 
         return Response({'message': 'View registered'}, status=201)
 
 
-class CommentCreateView(generics.ListCreateAPIView):
+class CommentListCreateView(generics.ListCreateAPIView):
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
 
@@ -115,7 +125,26 @@ class CommentCreateView(generics.ListCreateAPIView):
         UserInteraction.objects.create(
             user=self.request.user,
             post=post,
-            action='like'
+            action='comment'
+        )
+        serializer.save(author=self.request.user, post=post)
+
+
+class PostShareView(generics.ListCreateAPIView):
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        post_uid = self.kwargs.get('uid')
+        return Comment.objects.filter(post__uid=post_uid)
+
+    def perform_create(self, serializer):
+        post_uid = self.kwargs.get('uid')
+        post = Post.objects.get(uid=post_uid)
+        UserInteraction.objects.create(
+            user=self.request.user,
+            post=post,
+            action='comment'
         )
         serializer.save(author=self.request.user, post=post)
 

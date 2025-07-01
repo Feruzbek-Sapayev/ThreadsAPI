@@ -11,10 +11,10 @@ class PostMediaSerializer(serializers.ModelSerializer):
         fields = ['media', 'uploaded_at']
 
     def get_media(self, obj):
-        request = self.context.get('request')  # <-- bu kontekst orqali absolute URL hosil bo'ladi
-        if request:
-            return request.build_absolute_uri(obj.media.url)
-        return obj.media.url
+        request = self.context.get('request')
+        url = obj.media.url
+        return request.build_absolute_uri(url) if request else url
+
 
 
 class PostSerializer(serializers.ModelSerializer):

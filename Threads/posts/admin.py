@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Post, PostMedia
+from .models import Post, PostMedia, UserInteraction
 
 class MediaInline(admin.TabularInline):
     model = PostMedia
@@ -9,3 +9,6 @@ class MediaInline(admin.TabularInline):
 class PostAdmin(admin.ModelAdmin):
     inlines = [MediaInline]
     list_display = ['id', 'content', 'content', 'created_at', 'updated_at']
+
+
+admin.site.register(UserInteraction)
