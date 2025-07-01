@@ -113,3 +113,10 @@ def check_phone(request):
     if User.objects.filter(phone=phone).exists():
         return Response({"available": False, "message": "Phone number already taken."})
     return Response({"available": True})
+
+
+class AuthCheckView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({'user': request.user.username}, status=status.HTTP_200_OK)

@@ -24,14 +24,21 @@ class PostCreateView(generics.CreateAPIView):
         return context
 
 
-class PostDetailView(generics.RetrieveAPIView):
+class IsAuthorOrReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.author == request.user
+    
+
+class PostUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    lookup_field = 'uid'
+    permission_classes = [permissions.IsAuthenticated, IsAuthorOrReadOnly]
+    lookup_field = 'uid'  # Agar modelda UUID ishlatilgan bo‘lsa
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context['request'] = self.request  # bu yerda request uzatilyapti
+        context['request'] = self.request
         return context
 
 

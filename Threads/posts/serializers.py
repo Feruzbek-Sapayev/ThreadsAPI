@@ -16,7 +16,6 @@ class PostMediaSerializer(serializers.ModelSerializer):
         return request.build_absolute_uri(url) if request else url
 
 
-
 class PostSerializer(serializers.ModelSerializer):
     media = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
     images = serializers.SerializerMethodField()
@@ -30,6 +29,7 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ['uid', 'author', 'content', 'created_at', 'media', 'images', 'videos', 'comments_count', 'likes_count', 'views_count', 'tags']
+        read_only_fields = ['uid', 'author', 'created_at', 'media', 'images', 'videos', 'comments_count', 'likes_count', 'views_count', 'tags']
 
     def create(self, validated_data):
         media_files = validated_data.pop('media', [])
@@ -50,6 +50,12 @@ class PostSerializer(serializers.ModelSerializer):
     
     def get_tags(self, obj):
         return [tag.name for tag in obj.tags.all()]
+    
+    def update(self, instance, validated_data):
+        # Faqat content maydoni yangilanadi
+        instance.content = validated_data.get('content', instance.content)
+        instance.save()
+        return instance
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -60,7 +66,6 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ['post', 'author', 'content', 'created_at']
         
-
 
 class LikeSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
