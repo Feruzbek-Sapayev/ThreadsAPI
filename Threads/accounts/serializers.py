@@ -63,7 +63,6 @@ class LoginSerializer(serializers.Serializer):
         return attrs
     
 
-
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()
 
@@ -94,7 +93,8 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_posts(self, obj):
         from posts.serializers import PostSerializer
-        return PostSerializer(obj.posts.all().order_by('-created_at'), many=True).data
+        request = self.context.get('request') 
+        return PostSerializer(obj.posts.all().order_by('-created_at'), many=True, context={'request': request}).data
 
     def to_representation(self, instance):
         # Get the default representation

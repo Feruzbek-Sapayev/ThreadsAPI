@@ -78,7 +78,7 @@ class LikeSerializer(serializers.ModelSerializer):
         read_only_fields = ['user', 'created_at']
 
     def get_user(self, obj):
-        return obj.user.username if obj.user else None
+        return UserSerializer(obj.user).data if obj.user else None
 
     def get_post(self, obj):
         return obj.post.uid if obj.post else None

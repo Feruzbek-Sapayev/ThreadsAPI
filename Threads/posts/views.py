@@ -26,13 +26,17 @@ class PostCreateView(generics.CreateAPIView):
 
 class IsAuthorOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
+        # Agar so‘rov xavfsiz bo‘lsa (GET, HEAD, OPTIONS), ruxsat beriladi
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        # Aks holda, faqat post muallifiga ruxsat
         return obj.author == request.user
     
 
 class PostUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticated, IsAuthorOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     lookup_field = 'uid'  # Agar modelda UUID ishlatilgan bo‘lsa
     parser_classes = [MultiPartParser, FormParser]
 
@@ -57,27 +61,31 @@ class UserPostsListView(generics.ListAPIView):
 
 class LikeToggleView(generics.ListCreateAPIView):
     serializer_class = LikeSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         post_uid = self.kwargs.get('uid')
         post = get_object_or_404(Post, uid=post_uid)
         return Like.objects.filter(post=post)
-
-    def create(self, request, *args, **kwargs):
-        post_uid = self.kwargs.get('uid')
-        post = get_object_or_404(Post, uid=post_uid)
-
+    
+    def post(self, request, uid, *args, **kwargs):
+        post = get_object_or_404(Post, uid=uid)
         like, created = Like.objects.get_or_create(post=post, user=request.user)
         if not created:
+            # Agar like allaqachon mavjud bo‘lsa – unlike qilamiz
             like.delete()
-            return Response({'message': 'Unliked'}, status=status.HTTP_200_OK)
-        UserInteraction.objects.create(
-            user=request.user,
-            post=post,
-            action='like'
-        )
-        return Response({'message': 'Liked'}, status=status.HTTP_201_CREATED)
+            action = 'Disliked'
+            status_code = status.HTTP_204_NO_CONTENT
+        else:
+            # Yangi like qo‘shildi – interaction yozamiz
+            UserInteraction.objects.create(
+                user=request.user,
+                post=post,
+                action='like'
+            )
+            action = 'Liked'
+            status_code = status.HTTP_201_CREATED
+        likes_count = Like.objects.filter(post=post).count()
+        return Response({'message': action, 'likes_count': likes_count}, status=status_code)
 
 
 class ViewListCreateAPIView(generics.ListCreateAPIView):
