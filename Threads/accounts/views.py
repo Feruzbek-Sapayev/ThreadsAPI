@@ -2,12 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
-from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, LogoutSerializer, ProfileSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UserSerializer, LogoutSerializer, ProfileSerializer, FollowSerializer
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, parser_classes
 from django.shortcuts import get_object_or_404
-from .models import User
+from .models import User, UserFollow
 
 class RegisterView(APIView):
     parser_classes = [JSONParser, MultiPartParser, FormParser]  # Rasmlar uchun
@@ -120,3 +120,51 @@ class AuthCheckView(APIView):
 
     def get(self, request):
         return Response({'user': request.user.username}, status=status.HTTP_200_OK)
+    
+
+class FollowView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, username):
+        follower = request.user
+        following = get_object_or_404(User, username=username)
+
+        if follower == following:
+            return Response(
+                {"detail": "O'zingizni follow qilib bo'lmaydi."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        follow_instance = UserFollow.objects.filter(
+            follower=follower,
+            following=following
+        ).first()
+
+        if follow_instance:
+            follow_instance.delete()
+            return Response({"detail": "Unfollowed"}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            UserFollow.objects.create(follower=follower, following=following)
+            return Response({"detail": "Followed"}, status=status.HTTP_201_CREATED)
+    
+
+class FollowersView(APIView):
+    def get(self, request, username):
+        user = get_object_or_404(User, username=username)
+
+        followers_qs = UserFollow.objects.filter(following=user).select_related('follower')
+        followers = [follow.follower for follow in followers_qs]  # faqat userlar
+
+        data = UserSerializer(followers, many=True)
+        return Response({"followers": data.data}, status=status.HTTP_200_OK)
+
+
+class FollowingView(APIView):
+    def get(self, request, username):
+        user = get_object_or_404(User, username=username)
+
+        following_qs = UserFollow.objects.filter(follower=user).select_related('following')
+        followings = [follow.following for follow in following_qs]  # faqat userlar
+
+        data = UserSerializer(followings, many=True, context={'request': request})
+        return Response({"following": data.data}, status=status.HTTP_200_OK)

@@ -25,7 +25,7 @@ class Post(models.Model):
     uid = models.CharField(default=generate_shortuuid, max_length=11, unique=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     content = models.TextField(null=True, blank=True)
-    tags = models.ManyToManyField(Hashtag, blank=True, null=True)
+    tags = models.ManyToManyField(Hashtag, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
