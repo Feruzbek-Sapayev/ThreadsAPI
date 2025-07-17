@@ -10,6 +10,9 @@ Profile:
 /check/email - Email band emasligini tekshirish
 /check/phone - Telefon rakamni band emasligini tekshirish
 /auth/check (get) - tizimda ekanligini tekshirish
+/<username>/followers (get) - followers olish
+/<username>/following (get) - following olish
+/follow/<username> (post) (Auth) - tizimdagi user <username>ga follow bosishi yoki unfollow kilishi 
 
 Posts:
 /posts/add (post) - Post qo'shish
@@ -28,6 +31,5 @@ Posts:
 
 Ishlanishi kerak:
 activity
-follow
 saved posts
 liked posts
