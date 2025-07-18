@@ -108,6 +108,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_is_owner(self, obj):
         request = self.context.get('request')
+        print(request.user, obj)
         return request.user == obj
 
     def get_posts(self, obj):
