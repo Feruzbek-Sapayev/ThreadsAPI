@@ -4,7 +4,7 @@
 # python manage.py collectstatic --noinput
 
 # Apply database migrations
-python manage.py makemigrations
+python manage.py makemigrations accounts posts
 python manage.py migrate
 
 # Run the application
